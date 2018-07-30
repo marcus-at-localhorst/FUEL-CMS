@@ -454,6 +454,7 @@ class Form_builder {
 								$values[$key] === TRUE OR  
 								$values[$key] === 1 OR  
 								$values[$key] === 'y' OR  
+								$values[$key] === 't' OR  
 								$values[$key] === 'yes') ? TRUE : FALSE;
 						}
 					}
