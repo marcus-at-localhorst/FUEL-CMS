@@ -2,6 +2,8 @@
 
 Originally, FUEL CMS is running only with MySQL. Since I have to integrate a PostgreSQL DB in my app, I thought I give it a shot and try to make FUEL CMS compatible with PostgreSQL. I'm not there yet and I fear it will never be finished, but I hope, someone can use this as a basis.
 
+See the two Postgre Feature Branches.
+
 ---
 
 FUEL CMS is a [CodeIgniter](https://codeigniter.com) based content management system. To learn more about its features visit: http://www.getfuelcms.com
