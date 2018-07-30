@@ -481,7 +481,22 @@ class MY_Model extends CI_Model {
 		//Get the data out of the database
 		$query = $this->db->get($this->table_name);
 		
-		if (empty($query)) $query = ($this->db->dbdriver == 'mysql') ? new MY_DB_mysql_result() : new MY_DB_mysqli_result();
+		//if (empty($query)) $query = ($this->db->dbdriver == 'mysql') ? new MY_DB_mysql_result() : new MY_DB_mysqli_result();
+
+		if (empty($query))
+		{
+			$class_name = "MY_DB_{$this->db->dbdriver}_result";
+
+			if(class_exists($class_name))
+			{
+				$query = new $class_name();
+			}
+			else
+			{
+				// TODO: Errorhandling
+				// show_error($class_name)
+			}
+		}
 		
 		if ($this->return_method == 'query') 
 		{
@@ -1552,11 +1567,11 @@ class MY_Model extends CI_Model {
 					}
 					$insert_key = ($this->has_auto_increment) ? $this->key_field : NULL;
 					
-					$this->db->insert_ignore($this->table_name, $values, $insert_key);
+					$insert_id = $this->db->insert_ignore($this->table_name, $values, $insert_key);
 
 					// execute on_insert/update hook methods
 					$no_key = FALSE;
-					$insert_id = $this->db->insert_id();
+					
 					if (!$this->_has_key_field_value($values) AND $insert_id)
 					{
 						$no_key = TRUE;
