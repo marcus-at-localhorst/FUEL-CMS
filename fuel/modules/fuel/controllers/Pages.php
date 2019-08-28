@@ -10,7 +10,8 @@ class Pages extends Module {
 		parent::__construct(FALSE);
 
 		// allow the select URL page to show up regardless of permissions
-		$validate = (fuel_uri_segment(2) == 'select') ? FALSE : TRUE;
+		//$validate = (fuel_uri_segment(2) == 'select') ? FALSE : TRUE;
+		$validate = TRUE;
 		if ($validate)
 		{
 			$load_vars['user'] = $this->fuel->auth->user_data();
@@ -894,11 +895,12 @@ class Pages extends Module {
 		$this->load->library('session');
 		
 		$value = $this->input->get_post('selected', TRUE);
-		$filter = rawurldecode($this->input->get_post('filter', TRUE));
+		$filter = str_replace(array('(', ')', '$', '{', '}', '.', '[', ']', "'", '+', '='), '', rawurldecode($this->input->get_post('filter', TRUE)));
 
 		// Convert wild-cards to RegEx
 		$filter = str_replace(':any', '.+', str_replace(':num', '[0-9]+', $filter));
 		$this->js_controller_params['method'] = 'select';
+
 
 		$this->load->helper('array');
 		$this->load->helper('form');
@@ -921,7 +923,7 @@ class Pages extends Module {
 		// apply filter
 		if ( ! empty($filter))
 		{
-			$filter_callback = create_function('$a', 'return preg_match(\'#^'.$filter.'$#\', $a);');
+			$filter_callback = function($a) use ($filter) { return preg_match('#^'.addslashes($filter).'$#', $a); };
 			if (!empty($has_pdfs))
 			{
 				$options[lang('page_select_pages')] = array_filter($options[lang('page_select_pages')], $filter_callback);
@@ -929,7 +931,7 @@ class Pages extends Module {
 			}
 			else
 			{
-				$options = array_filter($options, $filter_callback);	
+				$options = array_filter($options, $filter_callback);
 			}
 		}
 
@@ -1053,9 +1055,6 @@ class Pages extends Module {
 			{
 				$upload_data = $this->upload->data();
 				$error = FALSE;
-
-				// read in the file so we can filter it
-				$file = read_file($upload_data['full_path']);
 
 				// sanitize the file before saving
 				$id = $this->input->post('id', TRUE);
@@ -1239,9 +1238,9 @@ class Pages extends Module {
 				$data = $this->fuel_pagevariables_model->find_one_array($where);
 
 				// if there is a field with the suffix of _upload, then we will overwrite that posted value with this value
-				if (substr($file_tmp, ($file_tmp - 7)) == '_upload')
+				if (substr($file_tmp, strlen($file_tmp) - 7) == '_upload')
 				{
-					$field_name = substr($file_tmp, 0, ($file_tmp - 7));
+					$field_name = substr($file_tmp, 0, strlen($file_tmp) - 7);
 				}
 
 				if (isset($posted[$field_name]))
